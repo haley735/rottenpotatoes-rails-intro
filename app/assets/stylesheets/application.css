@@ -49,7 +49,7 @@ h1.title {
   border-bottom: 4px solid gold;
   font-size: 2em;
   font-style: normal;
-}
+i}
 table#movies {
   margin: 10px;
   border-collapse: collapse;
@@ -64,6 +64,7 @@ table#movies th {
 table#movies th, table#movies td {
   padding: 4px;
   text-align: left;
+  font-color: black;
 }
 #notice #warning {
   background: rosybrown;

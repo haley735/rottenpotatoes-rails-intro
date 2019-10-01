@@ -48,7 +48,7 @@ class MoviesController < ApplicationController
   end
 
   def create
-    @movie = Movie.create!(params[:movie])
+    @movie = Movie.create!(params[:movies])
     flash[:notice] = "#{@movie.title} was successfully created."
     redirect_to movies_path
   end
