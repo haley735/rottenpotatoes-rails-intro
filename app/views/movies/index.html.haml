@@ -15,9 +15,9 @@
   %thead
     %tr
     %th{:class => @movie_highlight}= link_to "Movie Title", movie_path(:sorting_mechanism => 'title'), :id => "title_header"
-      %th Rating
-      %th{:class => @date_highlight}= link_to "Release Date", movie_path(:sorting_mechanism => 'release_date'), :id => "release_date_header"
-      %th More Info
+    %th Rating
+    %th{:class => @date_highlight}= link_to "Release Date", movie_path(:sorting_mechanism => 'release_date'), :id => "release_date_header"
+    %th More Info
   %tbody
     - @movies.each do |movie|
       %tr
