@@ -7,28 +7,40 @@ class MoviesController < ApplicationController
   end
 
   def index
-    if(!params.has_key?(:sort) && !params.has_key?(:ratings))
-      if(session.has_key?(:sort) || session.has_key?(:ratings))
-        redirect_to movies_path(:sort=>session[:sort], :ratings=>session[:ratings])
-      end
-    end
-    @sort = params.has_key?(:sort) ? (session[:sort] = params[:sort]) : session[:sort]
-    @all_ratings = Movie.all_ratings.keys
-    @ratings = params[:ratings]
-    if(@ratings != nil)
-      ratings = @ratings.keys
-      session[:ratings] = @ratings
-    else
-      if(!params.has_key?(:commit) && !params.has_key?(:sort))
-        ratings = Movie.all_ratings.keys
-        session[:ratings] = Movie.all_ratings
-      else
-        ratings = session[:ratings].keys
-      end
-    end
-    @movies = Movie.order(@sort).find_all_by_rating(ratings)
-    @mark  = ratings
+    @all_ratings = Movie.get_possible_ratings
 
+    unless params[:ratings].nil?
+      @filtered_ratings = params[:ratings]
+      session[:filtered_ratings] = @filtered_ratings
+    end
+
+    if params[:sorting_mechanism].nil?
+    else
+      session[:sorting_mechanism] = params[:sorting_mechanism]
+    end
+
+    if params[:sorting_mechanism].nil? && params[:ratings].nil? && session[:filtered_ratings]
+      @filtered_ratings = session[:filtered_ratings]
+      @sorting_mechanism = session[:sorting_mechanism]
+      flash.keep
+      redirect_to movies_path({order_by: @sorting_mechanism, ratings: @filtered_ratings})
+    end
+
+    @movies = Movie.all
+
+    if session[:filtered_ratings]
+      @movies = @movies.select{ |movie| session[:filtered_ratings].include? movie.rating }
+    end
+
+    if session[:sorting_mechanism] == "title"
+      @movies = @movies.sort! { |a,b| a.title <=> b.title }
+      @movie_highlight = "hilite"
+    elsif session[:sorting_mechanism] == "release_date"
+      @movies = @movies.sort! { |a,b| a.release_date <=> b.release_date }
+      @date_highlight = "hilite"
+    else
+      
+    end
   end
 
   def new
@@ -59,19 +71,15 @@ class MoviesController < ApplicationController
     redirect_to movies_path
   end
 
-  def similar_movie
-    id = params[:id]
-    @movie = Movie.find_by_id(id)
-    if (@movie.director.length == 0)
-      flash[:notice] = "'#{@movie.title}' has no director info."
+  def find_with_same_director
+    @movie = Movie.find(params[:id])
+    @current_movie_director = @movie.director
+    if @current_movie_director.nil? or @current_movie_director.empty?
+      flash[:warning] = "'#{@movie.title}' has no director info."
       redirect_to movies_path
+    else
+      @movies_to_render = Movie.find_all_by_director(@current_movie_director)
     end
-    @movies = Movie.find_all_by_director(@movie.director)
   end
-  
-  def find_class(header)
-    params[:sort] == header ? 'hilite' : nil
-  end
-  helper_method :find_class
 
 end
